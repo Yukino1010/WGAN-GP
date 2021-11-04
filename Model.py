@@ -5,7 +5,7 @@ Created on Tue Nov  2 15:03:37 2021
 @author: s1253
 """
 from tensorflow.keras.layers import Input, Conv2D, Flatten, Dense, Reshape, Activation, BatchNormalization,\
-    LeakyReLU, Dropout, UpSampling2D, Conv2DTranspose
+    LeakyReLU, Dropout, UpSampling2D, Conv2DTranspose, LayerNormalization
 import numpy as np
 
 from tensorflow.keras import Model
@@ -103,7 +103,7 @@ class Generator():
 class Discriminator():
     def __init__(self,
                  discriminator_input,
-                 batch_norm,
+                 layer_norm,
                  activation,
                  discriminator_conv_filters,
                  discriminator_conv_kernal,
@@ -112,7 +112,7 @@ class Discriminator():
         
         self.discriminator_input = discriminator_input
         self.n_layer = len(discriminator_conv_filters)
-        self.batch_norm = batch_norm
+        self.layer_norm = layer_norm
         self.activation = activation
         self.discriminator_conv_filters = discriminator_conv_filters
         self.discriminator_conv_kernal = discriminator_conv_kernal
@@ -143,8 +143,8 @@ class Discriminator():
              
              if i < self.n_layer-1:
                  
-                 if self.batch_norm:
-                    x = BatchNormalization()(x)
+                 if self.layer_norm:
+                    x = LayerNormalization()(x)
                     
                  x = self.get_activation(self.activation)(x)
             

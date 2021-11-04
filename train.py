@@ -16,13 +16,13 @@ from tensorflow.keras import backend as K
 
 TARGET_IMG_SIZE = 64 
 
-BATCH_SIZE = 16
+BATCH_SIZE = 28
 NOISE_DIM = 100
 LAMBDA = 10 
 
-EPOCHs = 30
+EPOCHs = 40
 CURRENT_EPOCH = 1 
-SAVE_EVERY_N_EPOCH = 10
+SAVE_EVERY_N_EPOCH = 5
 
 N_CRITIC = 3 
 LR = 1e-4
@@ -35,14 +35,14 @@ file_list = [str(path) for path in data_path.glob('*.jpg')]
 
 list_ds = tf.data.Dataset.from_tensor_slices(file_list)
 
-train_data = list_ds.map(preprocess_image).shuffle(100).batch(BATCH_SIZE)
+#data preprocess
+train_data = list_ds.map(preprocess_image).shuffle(500).batch(BATCH_SIZE)
 
 
 
-MODEL_NAME = 'WGAN-GP'
-OUTPUT_PATH = os.path.join('outputs', MODEL_NAME)
+MODEL_NAME = 'WGAN'
+OUTPUT_PATH = os.path.join('outputs', "LayerNorm")
 
-TRAIN_LOGDIR = os.path.join("logs", "tensorflow", MODEL_NAME, 'train_data')
 
 if not os.path.exists(OUTPUT_PATH):
     os.makedirs(OUTPUT_PATH)
@@ -58,23 +58,24 @@ generator = Generator(input_dim=NOISE_DIM,
                       batch_norm=True,
                       activation="leaky_relu",
                       dropout=0.2,
-                      generator_upsample=[1,2,2,2,2],
-                      generator_conv_filters=[1024,512,256,128,3],
-                      generator_conv_kernal=[4,4,4,4,4],
-                      generator_conv_stride=[1,1,1,1,1]
+                      generator_upsample=[2,2,2,2],
+                      generator_conv_filters=[512,256,128,3],
+                      generator_conv_kernal=[3,3,3,3],
+                      generator_conv_stride=[1,1,1,1]
                       ).build_layer()
 
 
 discriminator = Discriminator(discriminator_input=(TARGET_IMG_SIZE, TARGET_IMG_SIZE, 3),
-                         batch_norm=True,
+                         layer_norm=True,
                          activation="leaky_relu",
                          discriminator_conv_filters=[64,128,256,512,1],
-                         discriminator_conv_kernal=[4,4,4,4,4],
+                         discriminator_conv_kernal=[3,3,3,3,3],
                          discriminator_conv_stride=[1,2,2,2,2]
                          ).build_discriminator()
     
 #generator.summary()
 #discriminator.summary()
+
 
 checkpoint_path = os.path.join("checkpoints", "picture", MODEL_NAME)
 
@@ -92,15 +93,15 @@ if ckpt_manager.latest_checkpoint:
     CURRENT_EPOCH = latest_epoch * SAVE_EVERY_N_EPOCH
     print ('Latest checkpoint of epoch {} restored!!'.format(CURRENT_EPOCH))
     
-  
-
-
+ 
+    
+''' training step  '''
 
 def WGAN_GP_train_d_step(real_image, batch_size):
 
     noise = tf.random.normal([batch_size, NOISE_DIM])
     epsilon = tf.random.uniform(shape=[batch_size, 1, 1, 1], minval=0, maxval=1)
-   
+
     with tf.GradientTape(persistent=True) as d_tape:
         with tf.GradientTape() as gp_tape:
             fake_image = generator([noise], training=True)
@@ -142,10 +143,9 @@ def WGAN_GP_train_g_step(real_image, batch_size):
 
 
 current_learning_rate = LR
-#trace = True
 n_critic_count = 0
 
-
+# customize learning rate
 def learning_rate_decay(current_lr, decay_factor=DECAY_FACTOR):
     
     new_lr = max(current_lr / decay_factor, MIN_LR)
@@ -155,10 +155,13 @@ def set_learning_rate(new_lr):
     K.set_value(D_optimizer.lr, new_lr)
     K.set_value(G_optimizer.lr, new_lr)
 
+
 num_examples_to_generate = 18
 sample_noise = tf.random.normal([num_examples_to_generate, NOISE_DIM])     
 
-for epoch in range(CURRENT_EPOCH, EPOCHs):
+
+
+for epoch in range(CURRENT_EPOCH, EPOCHs+1):
     start = time.time()
     print('Start of epoch %d' % (epoch,))
 
@@ -182,6 +185,7 @@ for epoch in range(CURRENT_EPOCH, EPOCHs):
     generate_and_save_images(generator, epoch, [sample_noise], OUTPUT_PATH, figure_size=(12,6), subplot=(3,6), save=True)
     
     if epoch % SAVE_EVERY_N_EPOCH == 0:
+        #save model
         ckpt_save_path = ckpt_manager.save()
         print ('Saving checkpoint for epoch {} at {}'.format(epoch,
                                                              ckpt_save_path))
