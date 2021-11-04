@@ -29,4 +29,10 @@ I think the result will be better if I use bigger batch-size and more data
 ## Data
 This implementation uses the data from Hung-yi Lee the professor in National Taiwan University
 
+## Result
 
+
+## References
+1. **Improved Training of Wasserstein GANs** [[arxiv](https://arxiv.org/abs/1704.00028)]
+2. National Taiwan University **Hung-yi Lee** [https://speech.ee.ntu.edu.tw/~hylee/ml/2021-spring.html]
+3. davidADSP GDL_code[https://github.com/davidADSP/GDL_code]
