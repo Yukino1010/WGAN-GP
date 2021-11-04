@@ -30,8 +30,11 @@ I think the result will be better if I use bigger batch-size and more data
 This implementation uses the data from Hung-yi Lee the professor in National Taiwan University
 
 ## Result
-
-
+<p align="center">
+<i>After Epoch 1:</i><img src="https://github.com/Yukino1010/WGAN-GP/blob/master/outputs/LayerNorm/image_at_epoch_0001.png" ><br>
+<i>After Epoch 10:</i><img src="https://github.com/Yukino1010/WGAN-GP/blob/master/outputs/LayerNorm/image_at_epoch_0010.png"> <br>
+<i>After Epoch 40:</i><img src="https://github.com/Yukino1010/WGAN-GP/blob/master/outputs/LayerNorm/image_at_epoch_0040.png">
+</p>
 ## References
 1. **Improved Training of Wasserstein GANs** [[arxiv](https://arxiv.org/abs/1704.00028)]
 2. National Taiwan University **Hung-yi Lee** [https://speech.ee.ntu.edu.tw/~hylee/ml/2021-spring.html]
